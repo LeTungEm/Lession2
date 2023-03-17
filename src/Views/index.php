@@ -35,7 +35,7 @@
         </nav>
         <!-- Form search -->
         <form class="form-inline mt-3">
-            <input style="border-width: 5px;" class="form-control w-100 mr-sm-2 text-center" type="search"
+            <input style="border-width: 5px;" class="form-control w-100 text-center" type="search"
                 placeholder="Search" aria-label="Search">
         </form>
     </header>
@@ -65,19 +65,18 @@
                     $categoryList = $Category->getAll();
                     $data = array();
                     $data[] = $Category->buildTree('0',$categoryList);
-                    function xuat($list, $count){
+                    function xuat($list, $child_level){
                         foreach ($list as $value) { 
                 ?>
                             <tr>
                             <th scope='row'><?php echo $value->getId() ?></th>
-                            <td style="padding-left: <?php echo $count*20; ?>px;"><?php echo ($count > 0)?"|__":'';echo $value->getName() ?></td>
+                            <td style="padding-left: <?php echo $child_level*20; ?>px;"><?php echo ($child_level > 0)?"|__":'';echo $value->getName() ?></td>
                             </tr>
                 <?php
                             if(count($value->getListChild()[0]) > 0){
-                                $count++;
-                                xuat($value->getListChild()[0], $count);
+                                xuat($value->getListChild()[0], $child_level+1);
                             }
-                            $count = 0;
+                            $$child_level = 0;
                         }
                     }
                     xuat($data[0], 0); 
