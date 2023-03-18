@@ -3,7 +3,7 @@ class Category extends Db
 {
     private $id;
     private $name;
-    private $parent_id;
+    private $parentId;
     public $listChild = array();
 
     public function getId()
@@ -26,11 +26,11 @@ class Category extends Db
     }
     public function getParentId()
     {
-        return $this->parent_id;
+        return $this->parentId;
     }
-    public function setParentId($parent_id)
+    public function setParentId($parentId)
     {
-        $this->parent_id = $parent_id;
+        $this->parentId = $parentId;
     }
 
     public function getListChild(){
@@ -38,7 +38,7 @@ class Category extends Db
     }
 
     public function setListChild($listChild){
-        $this->$listChild[] = $listChild;
+        $this->$listChild = $listChild;
     }
 
     public function getAll()
@@ -46,28 +46,30 @@ class Category extends Db
         $sql = "select * from categories";
         return $this->select($sql);
     }
-    public function buildTree($parent_id, $categories)
-    {
-        // $child_categories = [];
-        // foreach ($categories as $category) {
-        //     if ($category["id"] == $parent_id) {
-        //         $id = $category["id"];
-        //         $name = $category["name"];
-        //         $parent_id = $category["parent_id"];
-        //         $listChild = $this->buildTree($category["id"], $categories);
-        //         $node = new Category();
-        //         $node->setId($id);
-        //         $node->setName($name);
-        //         $node->setParentId($parent_id);
-        //         $node->setListChild($listChild);
-        //         array_push($child_categories, $node);
-        //     }
-        // }
-        // return $child_categories;
 
+    public function insertCategory($name, $parentId){
+        $sql = "insert into categories (name, parent_id) values(?,?);";
+        $this->insert($sql, array($name, $parentId));
+        $sql = "SELECT LAST_INSERT_ID() as max;";
+        $data = $this->select($sql);
+        return ($data != null)? $data[0]['max']:null;
+    }
+
+    public function deleteCategory($id){
+        $sql = "delete from categories where id = ?";
+       return $this->delete($sql, array($id));
+    }
+
+    public function editCategory($name, $parentId, $id){
+        $sql = "update categories set name = ?, parent_id = ? where id = ?";
+       return $this->update($sql, array($name, $parentId, $id));
+    }
+
+    public function buildTree($parentId, $categories)
+    {
         $arr = array();
         foreach ($categories as $value) {
-            if($value['parent_id'] == $parent_id){
+            if($value['parent_id'] == $parentId){
                 $node = new Category();
                 $id = $value['id'];
                 $name = $value['name'];
@@ -75,7 +77,7 @@ class Category extends Db
                 array_push($listChild, $this->buildTree($id, $categories));
                 $node->setId($id);
                 $node->setName($name);
-                $node->setParentId($parent_id);
+                $node->setParentId($parentId);
                 $node->listChild = $listChild;
                 $arr[] = $node;
             }
